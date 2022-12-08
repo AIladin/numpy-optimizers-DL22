@@ -6,7 +6,7 @@ from datagen import generate_data
 if __name__ == "__main__":
     x, y = generate_data(3, -2, 1, 10000, 0.01)
     poly_fn = poly_function.Polynom()
-    optimizer = optimizers.SGD(
+    optimizer = optimizers.Momentum(
         poly_fn,
         losses.MSELoss(),
         0.01,

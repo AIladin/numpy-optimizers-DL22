@@ -13,6 +13,8 @@ class Loss(Protocol):
 
 
 class Optimizable(Protocol):
+    weights: np.ndarray
+
     def __init__(self):
         ...
 
@@ -59,11 +61,21 @@ class SGD:
         y: np.ndarray,
         epochs: int,
         batch_size: int,
+        keep_epochs_pbar: bool = True,
+        keep_total_pbar: bool = True,
+        epoch_verbose: bool = False,
+        total_verbose: bool = True,
     ) -> list[float]:
         epoch_history = []
         n_batches = int(np.ceil(len(x) / batch_size))
 
-        epoch_iterator = trange(0, epochs, desc="Total")
+        epoch_iterator = trange(
+            0,
+            epochs,
+            desc="Model",
+            leave=keep_total_pbar,
+            disable=not total_verbose,
+        )
 
         for i in epoch_iterator:
             batch_history: list[float] = []
@@ -74,7 +86,8 @@ class SGD:
                 ),
                 desc=f"Epoch {i}",
                 total=n_batches,
-                leave=True,
+                leave=keep_epochs_pbar,
+                disable=not epoch_verbose,
             )
             for x_batch, y_batch in batch_iterator:
                 batch_loss = self.step(x_batch, y_batch)
@@ -83,4 +96,4 @@ class SGD:
             epoch_loss = np.mean(batch_history)
             epoch_history.append(epoch_loss)
             epoch_iterator.set_postfix({"loss": epoch_loss})
-        return epoch_loss
+        return epoch_history
